@@ -1,66 +1,100 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Instagram Downloader</title>  <style>
-    body{
-      font-family: Arial;
-      background:#111827;
-      color:white;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      height:100vh;
-      margin:0;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    .box{
-      background:#1f2937;
-      padding:25px;
-      border-radius:10px;
-      width:350px;
-      text-align:center;
-    }
+<title>Instagram Downloader</title>
 
-    input{
-      width:100%;
-      padding:12px;
-      margin-top:10px;
-      border:none;
-      border-radius:8px;
-    }
+<style>
 
-    button{
-      margin-top:15px;
-      padding:12px 20px;
-      background:#e1306c;
-      border:none;
-      color:white;
-      border-radius:8px;
-      cursor:pointer;
-    }
+body{
+  font-family:Arial;
+  background:#111827;
+  color:white;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+  margin:0;
+}
 
-    a{
-      color:#60a5fa;
-      display:block;
-      margin-top:15px;
-    }
-  </style></head>
-<body><div class="box">
-  <h2>Instagram Downloader</h2>  <input type="text" id="url" placeholder="Paste Instagram URL"><button onclick="download()">Download</button>
+.box{
+  background:#1f2937;
+  padding:25px;
+  border-radius:12px;
+  width:350px;
+  text-align:center;
+}
 
-  <div id="result"></div>
-</div><script>
-async function download() {
+input{
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:8px;
+}
+
+button{
+  margin-top:15px;
+  padding:12px 20px;
+  background:#e1306c;
+  border:none;
+  color:white;
+  border-radius:8px;
+  cursor:pointer;
+}
+
+.media{
+  margin-top:20px;
+}
+
+video,img{
+  width:100%;
+  border-radius:10px;
+  margin-top:10px;
+}
+
+a{
+  display:block;
+  margin-top:10px;
+  color:#60a5fa;
+}
+
+</style>
+
+</head>
+<body>
+
+<div class="box">
+
+<h2>Instagram Downloader</h2>
+
+<input
+  type="text"
+  id="url"
+  placeholder="Paste Instagram URL"
+/>
+
+<button onclick="downloadMedia()">
+Download
+</button>
+
+<div id="result"></div>
+
+</div>
+
+<script>
+
+async function downloadMedia(){
 
   const url = document.getElementById("url").value;
   const result = document.getElementById("result");
 
   result.innerHTML = "Loading...";
 
-  try {
+  try{
 
-    const res = await fetch("/api/download", {
+    const response = await fetch("/api/download",{
       method:"POST",
       headers:{
         "Content-Type":"application/json"
@@ -68,29 +102,46 @@ async function download() {
       body:JSON.stringify({ url })
     });
 
-    const data = await res.json();
+    const data = await response.json();
 
     if(!data.success){
-      result.innerHTML = "Failed";
+
+      result.innerHTML = "Failed to fetch media";
       return;
+
     }
 
-    const media =
-      data.data.data?.[0]?.url ||
-      data.data.result?.[0]?.url;
+    result.innerHTML = "";
 
-    if(!media){
-      result.innerHTML = "No media found";
-      return;
-    }
+    data.media.forEach((mediaUrl,index)=>{
 
-    result.innerHTML = `
-      <a href="${media}" target="_blank">Download Media</a>
-    `;
+      result.innerHTML += `
 
-  } catch(err){
-    result.innerHTML = "Error";
+      <div class="media">
+
+        <video controls>
+          <source src="${mediaUrl}">
+        </video>
+
+        <a href="${mediaUrl}" download>
+          Download Media ${index + 1}
+        </a>
+
+      </div>
+
+      `;
+
+    });
+
+  }catch(err){
+
+    result.innerHTML = "Error occurred";
+
   }
+
 }
-</script></body>
+
+</script>
+
+</body>
 </html>
