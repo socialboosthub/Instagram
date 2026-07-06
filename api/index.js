@@ -1,5 +1,5 @@
 const express = require("express");
-const axios = require("axios");
+const { instagramGetUrl } = require("instagram-url-direct");
 
 const app = express();
 
@@ -11,16 +11,25 @@ app.post("/api/download", async (req, res) => {
 
     const { url } = req.body;
 
-    const response = await axios.get(
-      `https://api.agatz.xyz/api/igdl?url=${encodeURIComponent(url)}`
-    );
+    if (!url) {
+      return res.status(400).json({
+        success: false,
+        message: "Instagram URL required"
+      });
+    }
 
-    res.json(response.data);
+    const data = await instagramGetUrl(url);
 
-  } catch (e) {
+    res.json({
+      success: true,
+      media: data.url_list
+    });
+
+  } catch (err) {
 
     res.status(500).json({
-      error: "Failed"
+      success: false,
+      message: err.message
     });
 
   }
